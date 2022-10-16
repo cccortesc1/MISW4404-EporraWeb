@@ -1,0 +1,61 @@
+name: Feature_develop_Deploy
+on:
+  push:
+    branches:
+    - '**'
+jobs:   
+  Job_automerge_dev_fea:
+    name: Job_automerge_dev_fea    
+    if: ${{ contains(github.event.head_commit.message, 'DeployF') }} 
+    runs-on: ubuntu-latest    
+    steps:
+      - name: automerge        
+        uses: "tukasz/direct-merge-action@develop"
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: develop
+          target-branch: ${{ github.ref }}
+  EjecucionPruebas: 
+    name: EjecucionPruebas 
+    needs: Job_automerge_dev_fea    
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout de repositorio
+      uses: actions/checkout@v2
+    - name: Configuración de entorno de python
+      uses: actions/setup-python@v2
+      with:
+          python-version: '3.9.10'
+    - name: Instalación de librerías y dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Correr pruebas
+      id: correr-pruebas
+      run: python -m unittest discover -s tests
+    - name: Validar resultado con errores
+      if: ${{ failure() }}
+      env:
+        MENSAJE_ERROR: Una o varias pruebas fallaron
+      run: echo "::set-output name=respuesta::${MENSAJE_ERROR}"
+    - name: Validar resultado sin errores
+      if: ${{ success() }}
+      env:
+        MENSAJE_EXITO: Todas las pruebas fueron exitosas
+      run: echo "::set-output name=respuesta::${MENSAJE_EXITO}"
+    - name: Calculo de cubrimiento
+      id: cubrimiento
+      run: |
+          coverage run -m unittest discover -s tests -v
+          coverage report -m
+  Job_automerge_fea_dev:
+    name: Automerge_feature_develop
+    needs: EjecucionPruebas
+    runs-on: ubuntu-latest    
+    steps:
+      - name: automerge        
+        uses: "tukasz/direct-merge-action@develop"
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: ${{ github.ref }}
+          target-branch: develop
