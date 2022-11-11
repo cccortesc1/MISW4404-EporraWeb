@@ -233,7 +233,66 @@ class TestApuesta(TestCase):
         self.assertEqual(solicitud_consultar_apuesta_por_id.status_code, 200)
         self.assertEqual(apuesta_obtenida["id_apostador"], 1)
 
-    # TODO: VISTA APUESTA POR ID DE PERFIL ADMINISTRADOR
+    def test_obtener_apuesta_por_id_administrador(self):
+        nueva_carrera = {
+            "nombre": "Carrera9",
+            "competidores": [
+                {"probabilidad": 0.6, "competidor": "Paz Manrique"},
+                {
+                    "probabilidad": 0.2,
+                    "competidor": self.data_factory.name(),
+                },
+                {
+                    "probabilidad": 0.2,
+                    "competidor": self.data_factory.name(),
+                },
+            ],
+        }
+
+        endpoint_carreras = "/usuario/{}/carreras".format(str(self.usuario_code))
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(self.token),
+        }
+
+        solicitud_nueva_carrera = self.client.post(
+            endpoint_carreras, data=json.dumps(nueva_carrera), headers=headers
+        )
+
+        respuesta_al_crear_carrera = json.loads(solicitud_nueva_carrera.get_data())
+        id_carrera = respuesta_al_crear_carrera["id"]
+        id_competidor = [
+            x
+            for x in respuesta_al_crear_carrera["competidores"]
+            if x["nombre_competidor"] == "Paz Manrique"
+        ][0]["id"]
+
+        nueva_apuesta = {
+            "valor_apostado": random.uniform(100, 500000),
+            "id_apostador": 1,
+            "id_competidor": id_competidor,
+            "id_carrera": id_carrera,
+        }
+
+        endpoint_apuestas = "/apuestas/{}".format(str(self.usuario_code))
+
+        solicitud_nueva_apuesta = self.client.post(
+            endpoint_apuestas, data=json.dumps(nueva_apuesta), headers=headers
+        )
+
+        respuesta_al_crear_apuesta = json.loads(solicitud_nueva_apuesta.get_data())
+        id_apuesta = respuesta_al_crear_apuesta["id"]
+
+        endpoint_apuesta = "/apuesta/{}".format(str(id_apuesta))
+
+        solicitud_consultar_apuesta_por_id = self.client.get(
+            endpoint_apuesta, headers=headers
+        )
+        apuesta_obtenida = json.loads(solicitud_consultar_apuesta_por_id.get_data())
+
+        self.assertEqual(solicitud_consultar_apuesta_por_id.status_code, 200)
+        self.assertEqual(apuesta_obtenida["id_apostador"], 1)
+
     def test_obtener_apuestas(self):
         nueva_carrera = {
             "nombre": "Carrera9",
