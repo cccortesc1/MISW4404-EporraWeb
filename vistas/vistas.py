@@ -162,12 +162,12 @@ class VistaCarrera(Resource):
     def get(self, id_carrera):
         carrera = Carrera.query.get_or_404(id_carrera)
 
-        newApuestas = []
+        new_apuestas = []
         for apuesta in carrera.apuestas:
             apuesta.apostador = Usuario.query.get(apuesta.id_apostador).usuario
-            newApuestas.append(apuesta)
+            new_apuestas.append(apuesta)
 
-        carrera.apuestas = newApuestas
+        carrera.apuestas = new_apuestas
         return carrera_schema.dump(carrera)
 
     @jwt_required()
@@ -222,11 +222,9 @@ class VistaApuestas(Resource):
         db.session.add(nueva_transaccion)
 
         usuario = Usuario.query.get_or_404(nueva_apuesta.id_apostador)
-        usuario = Usuario.query.get_or_404(nueva_apuesta.id_apostador)
         usuario.saldo = float(usuario.saldo) + float(nueva_apuesta.ganancia)
 
         db.session.commit()
-        return apuesta_schema.dump(nueva_apuesta)
         return apuesta_schema.dump(nueva_apuesta)
 
     @jwt_required()
@@ -334,9 +332,9 @@ class VistaApostadores(Resource):
 class VistaTiposCarreras(Resource):
     @jwt_required()
     def get(self):
-        tiposCarreras = TipoCarrera.query.all()
+        tipos_carreras = TipoCarrera.query.all()
         return [
-            tipo_carrera_schema.dump(tipo_carrera) for tipo_carrera in tiposCarreras
+            tipo_carrera_schema.dump(tipo_carrera) for tipo_carrera in tipos_carreras
         ]
 
 
