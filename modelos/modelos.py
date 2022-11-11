@@ -3,13 +3,13 @@ from marshmallow import fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 db = SQLAlchemy()
-
-
+const_user_id = "usuario.id"
+const_all_del_orphan = "all, delete, delete-orphan"
 class Apuesta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     valor_apostado = db.Column(db.Numeric)
     ganancia = db.Column(db.Numeric, default=0)
-    id_apostador = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    id_apostador = db.Column(db.Integer, db.ForeignKey(const_user_id))
     id_competidor = db.Column(db.Integer, db.ForeignKey("competidor.id"))
     id_carrera = db.Column(db.Integer, db.ForeignKey("carrera.id"))
 
@@ -19,9 +19,9 @@ class Carrera(db.Model):
     nombre_carrera = db.Column(db.String(128))
     tipo_carrera = db.Column(db.Integer, db.ForeignKey("tipo_carrera.id"))
     abierta = db.Column(db.Boolean, default=True)
-    competidores = db.relationship("Competidor", cascade="all, delete, delete-orphan")
-    apuestas = db.relationship("Apuesta", cascade="all, delete, delete-orphan")
-    usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    competidores = db.relationship("Competidor", cascade=const_all_del_orphan)
+    apuestas = db.relationship("Apuesta", cascade=const_all_del_orphan)
+    usuario = db.Column(db.Integer, db.ForeignKey(const_user_id))
 
 
 class Competidor(db.Model):
@@ -41,8 +41,8 @@ class Usuario(db.Model):
     saldo = db.Column(db.String(50), default="0")
     correo = db.Column(db.String(160), default="")
     medioPago = db.Column(db.String(50), default="")
-    carreras = db.relationship("Carrera", cascade="all, delete, delete-orphan")
-    apuestas = db.relationship("Apuesta", cascade="all, delete, delete-orphan")
+    carreras = db.relationship("Carrera", cascade=const_all_del_orphan)
+    apuestas = db.relationship("Apuesta", cascade=const_all_del_orphan)
     
 
 class Transaccion(db.Model):
@@ -50,14 +50,14 @@ class Transaccion(db.Model):
     valor = db.Column(db.Numeric)
     fecha = db.Column(db.DateTime)
     tipo = db.Column(db.String(50))
-    id_usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
+    id_usuario = db.Column(db.Integer, db.ForeignKey(const_user_id))
 
 
 class TipoCarrera(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre_tipo_carrera = db.Column(db.String(128))
     cantidad_maxima_competidores = db.Column(db.Numeric)
-    carreras = db.relationship("Carrera", cascade="all, delete, delete-orphan")
+    carreras = db.relationship("Carrera", cascade=const_all_del_orphan)
 
 class ApuestaSchema(SQLAlchemyAutoSchema):
     class Meta:

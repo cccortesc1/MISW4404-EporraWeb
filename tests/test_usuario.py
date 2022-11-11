@@ -28,7 +28,6 @@ class TestUsuario(TestCase):
             data=json.dumps(self.usuario_setup),
             headers=self.headers,
         )
-
         self.usuario_setup["id"] = response.json["id"]
 
     def tests_login(self):
