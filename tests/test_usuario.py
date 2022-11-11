@@ -69,3 +69,23 @@ class TestUsuario(TestCase):
         # Test delete user
         response = self.client.delete(f"/signin/{self.usuario_setup['id']}")
         self.assertEqual(response.status_code, 404)
+
+    def test_register(self):
+        self.set_up()
+
+        # Test register user
+        response = self.client.post(
+            "/signin",
+            data=json.dumps(
+                dict(
+                    usuario=self.data_factory.user_name(),
+                    contrasena=self.data_factory.password(),
+                    perfil="Apostador",
+                    saldo=1000,
+                    correo=self.data_factory.email(),
+                    medioPago="Efectivo",
+                )
+            ),
+            headers=self.headers,
+        )
+        self.assertEqual(response.status_code, 200)
