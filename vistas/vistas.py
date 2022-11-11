@@ -19,7 +19,7 @@ from modelos import (
     ReporteSchema,
     Transaccion,
     TransaccionSchema,
-    TipoCarreraSchema
+    TipoCarreraSchema,
 )
 from modelos.modelos import TipoCarrera
 
@@ -30,6 +30,7 @@ usuario_schema = UsuarioSchema()
 reporte_schema = ReporteSchema()
 transaccion_schema = TransaccionSchema()
 tipo_carrera_schema = TipoCarreraSchema()
+
 
 class VistaSignIn(Resource):
     def post(self):
@@ -44,8 +45,8 @@ class VistaSignIn(Resource):
             contrasena=request.json["contrasena"],
             perfil="Apostador",
             saldo=numeric("0"),
-            correo = request.json["correo"],
-            medioPago = request.json["medioPago"]
+            correo=request.json["correo"],
+            medioPago=request.json["medioPago"],
         )
         db.session.add(nuevo_usuario)
         db.session.commit()
@@ -56,7 +57,7 @@ class VistaSignIn(Resource):
             "id": nuevo_usuario.id,
             "perfil": nuevo_usuario.perfil,
             "correo": nuevo_usuario.correo,
-            "medioPago": nuevo_usuario.medioPago
+            "medioPago": nuevo_usuario.medioPago,
         }
 
     def put(self, id_usuario):
@@ -89,7 +90,7 @@ class VistaLogIn(Resource):
                 "perfil": usuario.perfil,
                 "saldo": usuario.saldo,
                 "correo": usuario.correo,
-                "medioPago": usuario.medioPago
+                "medioPago": usuario.medioPago,
             }
 
 
@@ -102,7 +103,9 @@ class VistaCarrerasUsuario(Resource):
         if stored_carrera is not None:
             return "La carrera ya existe", 412
 
-        nueva_carrera = Carrera(nombre_carrera=request.json["nombre"], tipo_carrera = request.json["nombre"])
+        nueva_carrera = Carrera(
+            nombre_carrera=request.json["nombre"], tipo_carrera=request.json["nombre"]
+        )
 
         probabilidad_total = 0
         for competidor in request.json["competidores"]:
@@ -128,8 +131,8 @@ class VistaCarrerasUsuario(Resource):
         try:
             db.session.commit()
         except IntegrityError:
-            type, value, traceback = sys.exc_info()
-            print('> %s: %s: %s' % (type, value, traceback))
+            value_type, value, traceback = sys.exc_info()
+            print("> %s: %s: %s" % (value_type, value, traceback))
             db.session.rollback()
             return "El usuario ya tiene un carrera con dicho nombre", 409
 
@@ -137,19 +140,18 @@ class VistaCarrerasUsuario(Resource):
 
     @jwt_required()
     def get(self, id_usuario):
-        usuario = Usuario.query.get_or_404(id_usuario)
-        carreras = Carrera.query.all() #usuario.carreras 
-        newCarreras = []
+        carreras = Carrera.query.all()  # usuario.carreras
+        new_carreras = []
         for carrera in carreras:
-            newApuestas = []
+            new_apuestas = []
             for apuesta in carrera.apuestas:
                 apuesta.apostador = Usuario.query.get(apuesta.id_apostador).usuario
-                newApuestas.append(apuesta)
+                new_apuestas.append(apuesta)
 
-            carrera.apuestas = newApuestas
-            newCarreras.append(carrera)
+            carrera.apuestas = new_apuestas
+            new_carreras.append(carrera)
 
-        return [carrera_schema.dump(carrera) for carrera in newCarreras]
+        return [carrera_schema.dump(carrera) for carrera in new_carreras]
 
 
 class VistaCarrera(Resource):
@@ -212,16 +214,16 @@ class VistaApuestas(Resource):
         db.session.add(nueva_apuesta)
 
         nueva_transaccion = Transaccion(
-                    id_usuario= nueva_apuesta.id_apostador,
-                    valor= nueva_apuesta.ganancia,
-                    tipo= "retiro",
-                    fecha=datetime.now(),
-                )
+            id_usuario=nueva_apuesta.id_apostador,
+            valor=nueva_apuesta.ganancia,
+            tipo="retiro",
+            fecha=datetime.now(),
+        )
         db.session.add(nueva_transaccion)
 
-        usuario = Usuario.query.get_or_404(nueva_apuesta.id_apostador)    
         usuario = Usuario.query.get_or_404(nueva_apuesta.id_apostador)
-        usuario.saldo = float(usuario.saldo) + float(nueva_apuesta.ganancia)    
+        usuario = Usuario.query.get_or_404(nueva_apuesta.id_apostador)
+        usuario.saldo = float(usuario.saldo) + float(nueva_apuesta.ganancia)
 
         db.session.commit()
         return apuesta_schema.dump(nueva_apuesta)
@@ -282,17 +284,17 @@ class VistaTerminacionCarrera(Resource):
                     apuesta.valor_apostado / competidor.cuota
                 )
                 nueva_transaccion = Transaccion(
-                    id_usuario= apuesta.id_apostador,
-                    valor= float(apuesta.ganancia),
-                    tipo= "recarga",
+                    id_usuario=apuesta.id_apostador,
+                    valor=float(apuesta.ganancia),
+                    tipo="recarga",
                     fecha=datetime.now(),
                 )
                 db.session.add(nueva_transaccion)
             else:
                 apuesta.ganancia = 0
-            
+
             usuario = Usuario.query.get_or_404(apuesta.id_apostador)
-            usuario.saldo = float(usuario.saldo) + float(apuesta.ganancia)    
+            usuario.saldo = float(usuario.saldo) + float(apuesta.ganancia)
 
         db.session.commit()
         return competidor_schema.dump(competidor)
@@ -317,6 +319,7 @@ class VistaReporte(Resource):
         schema = ReporteSchema()
         return schema.dump(reporte)
 
+
 class VistaApostadores(Resource):
     @jwt_required()
     def get(self):
@@ -331,7 +334,9 @@ class VistaTiposCarreras(Resource):
     @jwt_required()
     def get(self):
         tiposCarreras = TipoCarrera.query.all()
-        return [tipo_carrera_schema.dump(tipo_carrera) for tipo_carrera in tiposCarreras]
+        return [
+            tipo_carrera_schema.dump(tipo_carrera) for tipo_carrera in tiposCarreras
+        ]
 
 
 class VistaApostador(Resource):
@@ -382,7 +387,9 @@ class VistaTransaccion(Resource):
         suma_o_resta_saldo = 1 if request.json["tipo"] == "recarga" else -1
 
         usuario = Usuario.query.get_or_404(id_usuario)
-        usuario.saldo = float(usuario.saldo) + float(request.json["valor"]) * suma_o_resta_saldo
+        usuario.saldo = (
+            float(usuario.saldo) + float(request.json["valor"]) * suma_o_resta_saldo
+        )
         db.session.add(nueva_transaccion)
         db.session.commit()
         return transaccion_schema.dump(nueva_transaccion)
