@@ -141,7 +141,7 @@ class VistaCarrerasUsuario(Resource):
     @jwt_required()
     def get(self, id_usuario):
         carreras = Carrera.query.all()  # usuario.carreras
-        new_carreras = []
+        newCarreras = []
         for carrera in carreras:
             new_apuestas = []
             for apuesta in carrera.apuestas:
@@ -149,9 +149,9 @@ class VistaCarrerasUsuario(Resource):
                 new_apuestas.append(apuesta)
 
             carrera.apuestas = new_apuestas
-            new_carreras.append(carrera)
+            newCarreras.append(carrera)
 
-        return [carrera_schema.dump(carrera) for carrera in new_carreras]
+        return [carrera_schema.dump(carrera) for carrera in newCarreras]
 
 
 class VistaCarrera(Resource):
