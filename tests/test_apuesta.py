@@ -233,7 +233,6 @@ class TestApuesta(TestCase):
         self.assertEqual(solicitud_consultar_apuesta_por_id.status_code, 200)
         self.assertEqual(apuesta_obtenida["id_apostador"], 1)
 
-    # TODO: VISTA APUESTA POR ID DE PERFIL ADMINISTRADOR
     def test_obtener_apuesta_por_id_administrador(self):
         nueva_carrera = {
             "nombre": "Carrera9",
