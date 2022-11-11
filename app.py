@@ -2,7 +2,6 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
-from flask_wtf.csrf import CSRFProtect
 
 from modelos import db
 from vistas import (
@@ -22,8 +21,6 @@ from vistas import (
 )
 
 app = Flask(__name__)
-csrf = CSRFProtect()
-csrf.init_app(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///eporra.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = "frase-secreta"
