@@ -227,6 +227,7 @@ class VistaApuestas(Resource):
 
         db.session.commit()
         return apuesta_schema.dump(nueva_apuesta)
+        return apuesta_schema.dump(nueva_apuesta)
 
     @jwt_required()
     def get(self, id_usuario):
