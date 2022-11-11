@@ -155,9 +155,6 @@ class VistaCarrerasUsuario(Resource):
 
 
 class VistaCarrera(Resource):
-    # @jwt_required()
-    # def get(self, id_carrera):
-    #     return carrera_schema.dump(Carrera.query.get_or_404(id_carrera))
     @jwt_required()
     def get(self, id_carrera):
         carrera = Carrera.query.get_or_404(id_carrera)
