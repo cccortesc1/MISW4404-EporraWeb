@@ -1,4 +1,3 @@
-from cgitb import reset
 import json
 from unittest import TestCase
 
@@ -22,7 +21,7 @@ class TestApuesta(TestCase):
             "perfil": "Apostador",
             "saldo": 100000,
             "correo": self.data_factory.ascii_email(),
-            "medioPago": self.data_factory.credit_card_number(card_type='amex')
+            "medioPago": self.data_factory.credit_card_number(card_type="amex"),
         }
         solicitud_nuevo_usuario = self.client.post(
             "/signin",
@@ -36,7 +35,7 @@ class TestApuesta(TestCase):
             "perfil": "Apostador",
             "saldo": 100000,
             "correo": self.data_factory.ascii_email(),
-            "medioPago": self.data_factory.credit_card_number(card_type='amex')
+            "medioPago": self.data_factory.credit_card_number(card_type="amex"),
         }
 
         solicitud_nuevo_usuario = self.client.post(
@@ -234,6 +233,7 @@ class TestApuesta(TestCase):
         self.assertEqual(solicitud_consultar_apuesta_por_id.status_code, 200)
         self.assertEqual(apuesta_obtenida["id_apostador"], 1)
 
+    # TODO: VISTA APUESTA POR ID DE PERFIL ADMINISTRADOR
     def test_obtener_apuestas(self):
         nueva_carrera = {
             "nombre": "Carrera9",
